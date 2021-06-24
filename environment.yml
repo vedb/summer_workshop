@@ -1,0 +1,29 @@
+name: vedb_workshop
+channels:
+  - anaconda
+  - conda-forge
+  - auto 
+  - vedb
+dependencies:
+  - python=3.7
+  - numpy
+  - scipy
+  - matplotlib
+  - jupyter
+  - ipython
+  - pillow
+  - h5py
+  - seaborn
+  - pandas
+  - cython
+  - numexpr
+  - appdirs
+  - scikit-learn
+  - scikit-image
+  - shapely
+  - opencv=4.2.0
+  - msgpack-python=0.6.2
+  - pupil-detectors=1.0.5
+  - python-wget
+  - pip
+  - pypng  
