@@ -1,4 +1,4 @@
-name: vedb_workshop
+name: summer_workshop_test
 channels:
   - anaconda
   - conda-forge
