@@ -6,8 +6,6 @@ import textwrap
 import numpy as np
 import os
 
-from ..utils import parse_sensorstream_gps
-
 class Session(object):
 	def __init__(self, 
 			scene=None, 
@@ -54,42 +52,34 @@ class Session(object):
 			by using e.g. `size=(90, 120)` or `color='gray'` (see file_io.load_mp4)
 		"""
 		# Input check
-		if 'idx' in kwargs:
-			# Backward compatibility
-			warnings.warn('`idx` argument to load() has been deprecated - please use `time_idx` instead!')
-			time_idx = kwargs.pop("idx")
 		if (time_idx is not None) and (frame_idx is not None):
 			raise ValueError("Please specify EITHER time_idx OR frame_idx, but not both!")
 		if ':' in data_type:
 			data_type, sub_type = data_type.split(':')
 		else:
 			sub_type = None
-		if data_type == 'gps':
-			tt, data = parse_sensorstream_gps(self.paths[data_type][1], sub_type)
-			return tt, data
+		tf, df = self.paths[data_type]
+		if time_idx is not None:
+			st, fin = time_idx
+			tt = np.load(tf) - self.start_time
+			ti = (tt > st) & (tt < fin)
+			tt_clip = tt[ti]
+			indices, = np.nonzero(ti)
+			st_i, fin_i = indices[0], indices[-1]+1
+		elif frame_idx is not None:
+			st_i, fin_i = frame_idx
 		else:
-			tf, df = self.paths[data_type]
-			if time_idx is not None:
-				st, fin = idx
-				tt = np.load(tf) - self.start_time
-				ti = (tt > st) & (tt < fin)
-				tt_clip = tt[ti]
-				indices, = np.nonzero(ti)
-				st_i, fin_i = indices[0], indices[-1]+1
-			elif frame_idx is not None:
-				st_i, fin_i = frame_idx
-			else:
-
-			if 'odometry' in data_type:
-				# Consider handling indices in load_msgpack; currently
-				# an arg for idx is there, but not functional.
-				dd = file_io.load_msgpack(df)
-				dd = dd[st_i:fin_i]
-				if sub_type is not None:
-					dd = np.array([x[sub_type] for x in dd])
-			else:
-				dd = file_io.load_array(df, idx=(st_i, fin_i), **kwargs)
-			return tt_clip, dd
+			raise ValueError('Please specify either `time_idx` or `frame_idx`')
+		if 'odometry' in data_type:
+			# Consider handling indices in load_msgpack; currently
+			# an arg for idx is there, but not functional.
+			dd = file_io.load_msgpack(df)
+			dd = dd[st_i:fin_i]
+			if sub_type is not None:
+				dd = np.array([x[sub_type] for x in dd])
+		else:
+			dd = file_io.load_array(df, idx=(st_i, fin_i), **kwargs)
+		return tt_clip, dd
 
 	@property
 	def start_time(self):
@@ -193,15 +183,8 @@ class Session(object):
 		rstr = textwrap.dedent("""
 			vedb_store.Session
 			{d:>12s}: {date}
-			{i:>12s}: {lighting}
-			{sc:>12s}: {scene}
 			""")
 		return rstr.format(
 			d='date', 
 			date=self.date,
-			#i='instruction',
-			#i='lighting',
-			#instruction=self.instruction,
-			sc='scene',
-			scene=self.scene,
 			)
