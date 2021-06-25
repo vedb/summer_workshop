@@ -27,6 +27,8 @@ class Session(object):
 		for k, v in inpt.items():
 			if not k in ['self', 'start_time', 'recording_duration']:
 				setattr(self, k, v)
+		BASE_PATH, folder = os.path.split(folder)
+		self.folder = folder
 		self._base_path = BASE_PATH
 		self._paths = None
 		self._start_time = start_time
@@ -174,7 +176,7 @@ class Session(object):
 		params = {}
 		params['folder'] = folder_toplevel
 		params['date'] = session_date
-
+		ob.__init__(*params)
 		# set base directory to local base directory
 		ob._base_path = base_dir
 		return ob
