@@ -1,4 +1,4 @@
-name: summer_workshop_test
+name: summer_workshop
 channels:
   - anaconda
   - conda-forge
@@ -27,3 +27,4 @@ dependencies:
   - python-wget
   - pip
   - pypng  
+  - pupil_recording_interface

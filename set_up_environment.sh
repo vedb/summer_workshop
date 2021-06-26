@@ -1,6 +1,6 @@
 # Environment setup
 
-export name=vedb_workshop_test
+export name=summer_workshop
 
 # Create initial environment
 #mamba env create -f environment.yml
