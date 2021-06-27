@@ -40,6 +40,7 @@ fig.canvas.draw()
 
 # create show all images and their running average
 for i in range(len(desertList)):
+    fig.canvas.draw()
     # read in image examples and compute running averages
     desertExample = cv2.imread(desertList[i])
     desertExample = cv2.cvtColor(desertExample, cv2.COLOR_BGR2RGB)
