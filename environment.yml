@@ -28,3 +28,5 @@ dependencies:
   - pip
   - pypng  
   - pupil_recording_interface
+  - pip:
+    - netcdf4
