@@ -23,7 +23,8 @@ if [ -d file_io ]
 then
 	:
 else
-	git clone git@github.com:vedb/file_io.git
+	
+	git clone https://github.com/vedb/file_io.git
 fi
 cd file_io
 python setup.py install
@@ -33,7 +34,7 @@ if [ -d plot_utils ]
 then
 	:
 else
-	git clone git@github.com:piecesofmindlab/plot_utils.git
+	git clone https://github.com/piecesofmindlab/plot_utils.git
 fi
 cd plot_utils
 python setup.py install
