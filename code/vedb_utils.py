@@ -61,22 +61,22 @@ class Session(object):
 		else:
 			sub_type = None
 		tf, df = self.paths[data_type]
+		tt = np.load(tf) - self.start_time
 		if time_idx is not None:
 			st, fin = time_idx
-			tt = np.load(tf) - self.start_time
 			ti = (tt > st) & (tt < fin)
 			tt_clip = tt[ti]
 			indices, = np.nonzero(ti)
 			st_i, fin_i = indices[0], indices[-1]+1
 		elif frame_idx is not None:
 			st_i, fin_i = frame_idx
+			tt_clip = tt[st_i:fin_i]
 		else:
 			raise ValueError('Please specify either `time_idx` or `frame_idx`')
 		if np.in1d(data_type, ['odometry', 'accel','gyro']):
 			# Consider handling indices in load_msgpack; currently
 			# an arg for idx is there, but not functional.
-			dd = file_io.load_msgpack(df)
-			dd = dd[st_i:fin_i]
+			dd = file_io.load_msgpack(df, idx=(st_i, fin_i))
 			if sub_type is not None:
 				dd = np.array([x[sub_type] for x in dd])
 		else:

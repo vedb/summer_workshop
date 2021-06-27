@@ -30,3 +30,4 @@ dependencies:
   - pupil_recording_interface
   - pip:
     - netcdf4
+    - imageio-ffmpeg
