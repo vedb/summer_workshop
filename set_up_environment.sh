@@ -3,10 +3,9 @@
 export name=summer_workshop
 
 # Create initial environment
-#mamba env create -f environment.yml
+mamba env create -f environment.yml
 
 # Activate it
-#conda init bash
 conda activate $name
 
 # Make source code directory for git libraries
