@@ -72,7 +72,7 @@ class Session(object):
 			st_i, fin_i = frame_idx
 		else:
 			raise ValueError('Please specify either `time_idx` or `frame_idx`')
-		if 'odometry' in data_type:
+		if np.in1d(data_type, ['odometry', 'accel','gyro']):
 			# Consider handling indices in load_msgpack; currently
 			# an arg for idx is there, but not functional.
 			dd = file_io.load_msgpack(df)
@@ -125,8 +125,8 @@ class Session(object):
 	@property
 	def paths(self):
 		if self._paths is None:
-			to_find = ['world.mp4', 'eye0.mp4', 'eye1.mp4', 't265.mp4', 'odometry.pldata', 'gps.csv'] # more?
-			names = ['world_camera', 'eye_left', 'eye_right', 'tracking_camera', 'odometry', 'gps']
+			to_find = ['world.mp4', 'eye0.mp4', 'eye1.mp4', 't265.mp4', 'odometry.pldata', 'gps.csv', 'gaze.pldata','accel.pldata'] # more?
+			names = ['world_camera', 'eye_left', 'eye_right', 'tracking_camera', 'odometry', 'gps', 'gaze', 'accel']
 			_paths = {}
 			for fnm, nm in zip(to_find, names):
 				tt, ee = os.path.splitext(fnm)
