@@ -1,7 +1,7 @@
 """
 Created on Thr Jun 18 14:52:11 2021
 
-Usage: python detect_objects.py [video_path] [model_path] [start_time] [end_time]
+Usage: python detect_objects.py [video_path] [model_path] [start_time] [end_time] [show_output]
 
         Parameters
         ----------
@@ -17,6 +17,9 @@ Usage: python detect_objects.py [video_path] [model_path] [start_time] [end_time
 
         model_path: str
             path to the data folder
+         
+        show_output: bool
+            show the output during runtime
 
 @author: KamranBinaee
 """
@@ -28,7 +31,7 @@ import os
 import sys
 
 
-def detect_objects(video_path, model_path, start_index, end_index):
+def detect_objects(video_path, model_path, start_index, end_index, show_output=False):
 
     if (video_path == 'webcam'):
         print('reading from: webcam')
@@ -59,7 +62,7 @@ def detect_objects(video_path, model_path, start_index, end_index):
 
     minimum_probability = 0.5
 
-    frame_count = 0
+    frame_count = start_index
     while(cap.isOpened()):
         ret, img = cap.read()
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -118,10 +121,13 @@ def detect_objects(video_path, model_path, start_index, end_index):
                                     str(h) + ',' + str(frame_count) + '\n')
 
         out_video.write(img)
-        cv2.imshow("Image", img)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        if(show_output):
+            cv2.imshow("Image", img)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
         frame_count =+ 1
+        if frame_count > end_index:
+            break
     text_file.close()
     out_video.release()
     cap.release()
@@ -129,10 +135,14 @@ def detect_objects(video_path, model_path, start_index, end_index):
 
 
 if __name__ == "__main__":
+    print("args:", sys.argv)
     video_path = sys.argv[1]
     model_path = sys.argv[2]
     start_index = int(sys.argv[3])
     end_index = int(sys.argv[4])
-    print("args:", sys.argv)
-    detect_objects(video_path, model_path, start_index, end_index)
+    if len(sys.argv)>5:
+        show_output = bool(sys.argv[5])
+    else:
+        show_output = False
+    detect_objects(video_path, model_path, start_index, end_index, show_output)
 
