@@ -1,7 +1,7 @@
 """
 Created on Tue Jun 16 10:22:18 2020
 
-Usage: python detect_marker.py [data_path] [start_time] [end_time]
+Usage: python detect_marker.py [data_path] [start_time] [end_time] [show_output]
 
         Parameters
         ----------
@@ -14,6 +14,9 @@ Usage: python detect_marker.py [data_path] [start_time] [end_time]
 
         data_path: str
             path to the data folder
+
+        show_output: bool
+            show the output during runtime
 
 @author: KamranBinaee
 """
@@ -52,7 +55,7 @@ def define_blob_detector():
     # Create a detector with the parameters 
     return cv2.SimpleBlobDetector_create(params)
 
-def detect_marker(data_path, start_index, end_index):
+def detect_marker(data_path, start_index, end_index, show_output=False):
     # Prepare the empty lists for storing marker positions and the timestamps
     marker_x = []
     marker_y = []
@@ -130,21 +133,23 @@ def detect_marker(data_path, start_index, end_index):
                 marker_index.append(count)
                 #print("p = {:.1f} {:.1f} {:.1f} {}".format(keypoint.pt[0], keypoint.pt[1], keypoint.size, count))
 
-            # Show blobs using opencv imshow method
-            cv2.imshow('Frame',np.concatenate((blobs, grey_3_channel), axis=1))
             myString = '1'
             out.write(np.array(blobs))
-            if cv2.waitKey(2) & 0xFF == ord('q'):
-                break
+            # Show blobs using opencv imshow method
+            if(show_output):
+                cv2.imshow('Frame',np.concatenate((blobs, grey_3_channel), axis=1))
+                if cv2.waitKey(2) & 0xFF == ord('q'):
+                    break
 
         else:
 
             # If there is no blobs detected, just show the binary image and write it to the output video
-            cv2.imshow('Frame',grey_3_channel)
+            if(show_output):
+                cv2.imshow('Frame',grey_3_channel)
+                if cv2.waitKey(2) & 0xFF == ord('q'):
+                    break
             myString = '0'
             out.write(np.array(grey_3_channel))
-            if cv2.waitKey(2) & 0xFF == ord('q'):
-                break
 
     print('\nDone!')
     # Close all the opencv image frame windows opened
@@ -162,11 +167,15 @@ def detect_marker(data_path, start_index, end_index):
 
 
 if __name__ == "__main__":
+    print("args:", sys.argv)
     data_path = sys.argv[1]
     start_index = int(sys.argv[2])
     end_index = int(sys.argv[3])
-    print("args:", sys.argv)
-    detect_marker(data_path, start_index, end_index)
+    if len(sys.argv)>4:
+        show_output = bool(sys.argv[4])
+    else:
+        show_output = False
+    detect_marker(data_path, start_index, end_index, show_output)
 
 
 '''
