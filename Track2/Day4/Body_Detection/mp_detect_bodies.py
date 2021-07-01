@@ -65,7 +65,7 @@ def mp_detect_bodies(video_path, save_path, start_index = 0, end_index = 900, sh
     
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
         while cap.isOpened() and count < end_index:
-            cap.set(cv2.cv2.CAP_PROP_POS_FRAMES, count)
+            #cap.set(cv2.cv2.CAP_PROP_POS_FRAMES, count)
             success, image = cap.read()
             if not success:
                 print("Ignoring empty camera frame.")

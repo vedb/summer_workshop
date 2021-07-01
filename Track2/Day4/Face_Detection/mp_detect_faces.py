@@ -68,7 +68,7 @@ def mp_detect_faces(video_path, save_path, start_index = 0, end_index = 900, sho
     # cap = cv2.VideoCapture(0)
     with mp_face_mesh.FaceMesh(min_detection_confidence=0.1,min_tracking_confidence=0.1) as face_mesh:
         while cap.isOpened() and count < end_index:
-            cap.set(cv2.cv2.CAP_PROP_POS_FRAMES, count)
+            #cap.set(cv2.cv2.CAP_PROP_POS_FRAMES, count)
             success, image = cap.read()
             if not success:
                 print("Ignoring empty camera frame.")
