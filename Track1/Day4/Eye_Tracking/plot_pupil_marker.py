@@ -19,19 +19,22 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from matplotlib import colors
 
-def plot_pupil_marker(data_path):
+def plot_pupil_marker(pupil_data=None, marker_data=None, gaze_data=None):
     
-    pupil_dataFrame = pd.read_csv('detected_pupil_positions.csv')
-    marker_dataFrame = pd.read_csv('detected_marker_positions.csv')
-    gaze_dataFrame = pd.read_csv('gaze_positions.csv')
+    if pupil_data is None:
+        pupil_data = pd.read_csv('detected_pupil_positions.csv')
+    if marker_data is None:
+        marker_data = pd.read_csv('detected_marker_positions.csv')
+    if gaze_data is None:
+        gaze_data = pd.read_csv('gaze_positions.csv')
 
-    gaze_pixel_x = pupil_dataFrame.pupil_x.values
+    gaze_pixel_x = pupil_data.pupil_x.values
     # Because the y coordinate is upside  down in opencv compared to matplotlib
-    gaze_pixel_y = 400 - pupil_dataFrame.pupil_y.values
+    gaze_pixel_y = 400 - pupil_data.pupil_y.values
 
-    marker_pixel_x = marker_dataFrame.marker_x.values
+    marker_pixel_x = marker_data.marker_x.values
     # Because the y coordinate is upside  down in opencv compared to matplotlib
-    marker_pixel_y = 1024 - marker_dataFrame.marker_y.values
+    marker_pixel_y = 1024 - marker_data.marker_y.values
 
     print('pupilX shape = ', gaze_pixel_x.shape)
     print('pupilY shape = ',gaze_pixel_y.shape)
@@ -67,13 +70,13 @@ def plot_pupil_marker(data_path):
 
     ax1.grid(True)
     ax2.grid(True)
-    plt.savefig('Pupil_Vs_Marker.png', dpi = 200 )
-    plt.show()
+    #plt.savefig('Pupil_Vs_Marker.png', dpi = 200 )
+    #plt.show()
 
-    plt.close()
+    #plt.close()
 
-    x = gaze_dataFrame.norm_pos_x.values[2000:8200*4]*1280.0
-    y = gaze_dataFrame.norm_pos_y.values[2000:8200*4]*1024.0
+    x = gaze_data.norm_pos_x.values[2000:8200*4]*1280.0
+    y = gaze_data.norm_pos_y.values[2000:8200*4]*1024.0
 
     print(len(x))
     print(x.mean(), x.std(), x.max(), x.min())
@@ -84,13 +87,6 @@ def plot_pupil_marker(data_path):
     plt.title('2D Histogram of Gaze Positions', fontsize = 18)
     plt.xlim(0,1280)
     plt.ylim(0,1024)
-    plt.savefig('gaze_histogram.png', dpi = 200 )
-    plt.show()
-    plt.close()
-
-
-if __name__ == "__main__":
-    data_path = sys.argv[1]
-    print("args:", sys.argv)
-    plot_pupil_marker(data_path)
-
+    #plt.savefig('gaze_histogram.png', dpi = 200 )
+    #plt.show()
+    #plt.close()

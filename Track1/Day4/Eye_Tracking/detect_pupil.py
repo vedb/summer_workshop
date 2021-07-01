@@ -101,10 +101,10 @@ def detect_pupil(data_path, start_index, end_index, show_output=False):
         # Read the next frame from the video.
         raw_image = vid.get_data(count)
         # Switch the color channels since opencv reads the frames under BGR and the imageio uses RGB format
-        raw_image[:, :, [0, 2]] = raw_image[:, :, [2, 0]]
+        #raw_image[:, :, [0, 2]] = raw_image[:, :, [2, 0]]
 
         # Convert the image into grayscale
-        gray = cv2.cvtColor(raw_image,cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(raw_image,cv2.COLOR_RGB2GRAY)
 
         # This is for adaptive image thresholding (not necessary for our case)
         # window_size = 7
@@ -160,18 +160,20 @@ def detect_pupil(data_path, start_index, end_index, show_output=False):
                     break
 
     print('\n Pupil Detection Done!')
-    # Close all the opencv image frame windows opened
-    cv2.destroyAllWindows()
+    if live_output:
+        # Close all the opencv image frame windows opened
+        cv2.destroyAllWindows()
+    if save_video:
+        # Release the video writer handler so that the output video is saved to disk
+        out.release()
 
-    # Release the video writer handler so that the output video is saved to disk
-    out.release()
-
-    my_dict={'pupil_x':np.array(pupil_x), 'pupil_y':np.array(pupil_y),
-            'pupil_size':np.array(pupil_size), 'pupil_index':np.array(pupil_index)}
+    my_dict={'pupil_x':np.asarray(pupil_x), 'pupil_y':np.asarray(pupil_y),
+            'pupil_size':np.asarray(pupil_size), 'pupil_index':np.asarray(pupil_index)}
     data_frame = pd.DataFrame(my_dict)
     data_frame.to_csv('detected_pupil_positions.csv')
     print('Saved pupil data into csv file!')
     print('\n\nThe end!')
+    return data_frame
 
 if __name__ == "__main__":
     print("args:", sys.argv)

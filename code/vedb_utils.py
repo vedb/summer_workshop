@@ -34,7 +34,7 @@ class Session(object):
 		self._start_time = start_time
 		self._recording_duration = recording_duration
 	
-	def load(self, data_type, time_idx=(0, 10), frame_idx=None, **kwargs):
+	def load(self, data_type, time_idx=None, frame_idx=None, **kwargs):
 		"""
 		Parameters
 		----------
@@ -54,6 +54,8 @@ class Session(object):
 			by using e.g. `size=(90, 120)` or `color='gray'` (see file_io.load_mp4)
 		"""
 		# Input check
+		if (time_idx is None) and (frame_idx is None):
+			raise ValueError("Please specify EITHER time_idx OR frame_idx, but not neither!")
 		if (time_idx is not None) and (frame_idx is not None):
 			raise ValueError("Please specify EITHER time_idx OR frame_idx, but not both!")
 		if ':' in data_type:
@@ -71,8 +73,6 @@ class Session(object):
 		elif frame_idx is not None:
 			st_i, fin_i = frame_idx
 			tt_clip = tt[st_i:fin_i]
-		else:
-			raise ValueError('Please specify either `time_idx` or `frame_idx`')
 		if np.in1d(data_type, ['odometry', 'accel','gyro']):
 			# Consider handling indices in load_msgpack; currently
 			# an arg for idx is there, but not functional.
@@ -118,11 +118,6 @@ class Session(object):
 		return self._recording_duration
 		
 	@property
-	def datetime(self):
-		dt = datetime.datetime.strptime(self.date, '%Y_%m_%d_%H_%M_%S')
-		return dt
-	
-	@property
 	def paths(self):
 		if self._paths is None:
 			to_find = ['world.mp4', 'eye0.mp4', 'eye1.mp4', 't265.mp4', 'odometry.pldata', 'gps.csv', 'gyro.pldata','accel.pldata'] # more?
@@ -159,13 +154,6 @@ class Session(object):
 			base_dir = ''
 		if (len(base_dir) == 0) or (base_dir[0] != '/'):
 			base_dir = os.path.abspath(os.path.join(os.path.curdir, base_dir))
-		# Set date	(& be explicit about what constitutes date)	
-		session_date = folder_toplevel
-		try:
-			# Assume year_month_day_hour_min_second for date specification in folder title
-			dt = datetime.datetime.strptime(session_date, '%Y_%m_%d_%H_%M_%S')
-		except:
-			print('Date not parseable!')
 
 		def parse_resolution(res_string):
 			out = res_string.strip('()').split(',')
@@ -175,7 +163,6 @@ class Session(object):
 		# Define recording device, w/ tag
 		params = {}
 		params['folder'] = folder_toplevel
-		params['date'] = session_date
 		ob.__init__(*params)
 		# set base directory to local base directory
 		ob._base_path = base_dir
@@ -188,5 +175,55 @@ class Session(object):
 			""")
 		return rstr.format(
 			d='date', 
-			date=self.date,
+			date=self.folder,
 			)
+
+
+def get_image_region(image, center, size=(100,100), empty_value=np.nan):
+    """Extract a rectangular region of an image
+    
+    Parameters
+    ----------
+    image : array
+        image as a numpy array, should be (vdim, hdim) or (vdim, hdim, color)
+    center : tuple
+        (x,y) center, in absolute pixels or normalized (0-1) coordinates
+    size : tuple, optional
+        size of region to extract, (width, height)
+    empty_value : scalar, optional
+        value to use to pad the output if it goes off the edge of the image
+    
+    Returns
+    -------
+    cropped_image : array
+    	cropped image of size `size`
+    """
+    vdim, hdim = image.shape[:2]
+    x, y = center 
+    if x <= 1:
+        x = hdim * x
+    if y <= 1: 
+        y = vdim * y
+    width, height = size
+    left = int(x - width/2)
+    right = left + width
+    top = int(y - height/2)
+    bottom = top + height
+    
+    left_pad = np.maximum(-left, 0)
+    right_pad = np.maximum(right - hdim, 0)
+    top_pad = np.maximum(-top, 0)
+    bottom_pad = np.maximum(bottom - vdim, 0)
+    
+    left = np.maximum(0, left)
+    right = np.minimum(hdim, right)
+    top = np.maximum(0, top)
+    bottom = np.minimum(vdim, bottom)
+    
+    box = image[top:bottom, left:right]
+    if np.ndim(image) == 2:
+        pad_dims = ((top_pad, bottom_pad), (left_pad, right_pad))
+    elif np.ndim(image) == 3:
+        pad_dims = ((top_pad, bottom_pad), (left_pad, right_pad), (0, 0))
+    box = np.pad(box, pad_dims, mode='constant', constant_values=empty_value)
+    return box

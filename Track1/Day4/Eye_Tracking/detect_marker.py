@@ -75,7 +75,7 @@ def detect_marker(data_path, start_index, end_index, show_output=False):
     # Instantiate the video capture from imageio in order to read the eye video
     vid = imageio.get_reader(data_path + "/world.mp4",  'ffmpeg')
 
-    scale = 0.5
+    scale = 1.0
     size = (int(frame_width*scale), int(frame_height*scale))
 
     # Instantiate the video recorder in order to store the processed images to an output video
@@ -95,10 +95,10 @@ def detect_marker(data_path, start_index, end_index, show_output=False):
         raw_image = vid.get_data(count)
         raw_image = cv2.resize(raw_image, None, fx = scale, fy = scale)
         # Switch the color channels since opencv reads the frames under BGR and the imageio uses RGB format
-        raw_image[:, :, [0, 2]] = raw_image[:, :, [2, 0]]
+        #raw_image[:, :, [0, 2]] = raw_image[:, :, [2, 0]]
 
         # Convert the image into grayscale
-        gray = cv2.cvtColor(raw_image,cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(raw_image,cv2.COLOR_RGB2GRAY)
 
         # Perform image thresholding using a adaptive threshold window
         s = 13/(gray.shape[0]*scale)
@@ -152,9 +152,9 @@ def detect_marker(data_path, start_index, end_index, show_output=False):
             out.write(np.array(grey_3_channel))
 
     print('\nDone!')
-    # Close all the opencv image frame windows opened
-    cv2.destroyAllWindows()
-
+    if(show_output):
+        # Close all the opencv image frame windows opened
+        cv2.destroyAllWindows()
     # Release the video writer handler so that the output video is saved to disk
     out.release()
 
@@ -164,7 +164,7 @@ def detect_marker(data_path, start_index, end_index, show_output=False):
     data_frame.to_csv('detected_marker_positions.csv')
     print('Saved marker data into csv file!')
     print('\n\nThe end!')
-
+    return data_frame
 
 if __name__ == "__main__":
     print("args:", sys.argv)
@@ -175,7 +175,9 @@ if __name__ == "__main__":
         show_output = bool(sys.argv[4])
     else:
         show_output = False
-    detect_marker(data_path, start_index, end_index, show_output)
+    marker_data = detect_marker(data_path, start_index, end_index, show_output)
+    
+
 
 
 '''

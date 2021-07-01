@@ -1,3 +1,4 @@
+<<<<<<< Updated upstream:Track2/Day4/Hand_Detection/mp_detect_hands.py
 """
 Created on Tue Jun 22 08:18:22 2021
 
@@ -22,6 +23,9 @@ Usage: mp_detect_bodies(video_path, save_path, start_index, end_index, show_outp
             show the output during runtime
 @author: KamranBinaee
 """
+=======
+# %load mp_detect_hands.py
+>>>>>>> Stashed changes:Track2/Day4/Hand_Detection/hand_utils.py
 
 import cv2
 import mediapipe as mp
@@ -54,8 +58,8 @@ def add_text_to_image(image, text):
     )
     return image
 
-def simpleGesture(image, handLandmarks):
-
+def simpleGesture(handLandmarks):
+    """Guess gesture from configuration of fingers"""
     thumbIsOpen = False
     indexIsOpen = False
     middelIsOpen = False
@@ -119,17 +123,37 @@ def simpleGesture(image, handLandmarks):
         print("\r OK!", end = "\r")
         text = "OK!"
 
-    return add_text_to_image(image, text)
+    return text
 #     print("FingerState: thumbIsOpen? " + str(thumbIsOpen) + " - indexIsOpen? " + str(indexIsOpen) + " - middelIsOpen? " +
 #        str(middelIsOpen) + " - ringIsOpen? " + str(ringIsOpen) + " - pinkyIsOpen? " + str(pinkyIsOpen))
 
-def mp_detect_hands(video_path, save_path, start_index = 0, end_index = 900, show_output = False):
+def mp_detect_hands(video_path, save_path, start_index = 0, end_index = 900, save_video=False):
+    """Detect hands in a clip of a video
 
+    Parameters
+    ----------
+    video_path: str
+        path to the video
+    save_path: str
+        path to the saving directory
+    start_index: int
+        start index of the video
+    end_index: int
+        end index of the video
+    save_video: bool (optional, default False)
+        flag to save an output video or not
+
+    @author: KamranBinaee
+    """
+    # Outputs
+    gestures = np.zeros((end_index-start_index,))
+    locations = []
+    landmarks = []
+    # Inputs
     start_index = int(start_index)
     end_index = int(end_index)
     mp_drawing = mp.solutions.drawing_utils
     mp_hands = mp.solutions.hands
-
     # In case one wants to downsample the image for a faster code
     world_scale = 0.5
     if os.path.exists(video_path):
@@ -139,16 +163,15 @@ def mp_detect_hands(video_path, save_path, start_index = 0, end_index = 900, sho
         return False
     total_frame_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     print("total frame count: {}".format(total_frame_count))
-
-    fourcc = 'mp4v'
-    output_video_file = save_path +"/detected_hand.mp4"
-
-    frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * world_scale)
-    frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) * world_scale)
-    video_size = (frame_width, frame_height)
-    fps = 30
-    print("output video file: ", output_video_file)
-    out_video = cv2.VideoWriter(output_video_file,cv2.VideoWriter_fourcc(*fourcc), fps, video_size)
+    if save_video:
+        fourcc = 'mp4v'
+        output_video_file = save_path +"/detected_hand.mp4"
+        frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) * world_scale)
+        frame_width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) * world_scale)
+        video_size = (frame_width, frame_height)
+        fps = 30
+        print("output video file: ", output_video_file)
+        out_video = cv2.VideoWriter(output_video_file,cv2.VideoWriter_fourcc(*fourcc), fps, video_size)
 
     print("Start: {} and End Frames: {}".format(start_index, end_index))
         
@@ -159,6 +182,7 @@ def mp_detect_hands(video_path, save_path, start_index = 0, end_index = 900, sho
     with mp_hands.Hands(
         min_detection_confidence=0.5,
         min_tracking_confidence=0.5) as hands:
+        cap.set(cv2.cv2.CAP_PROP_POS_FRAMES, start_index)
         while cap.isOpened() and count < end_index:
             cap.set(cv2.cv2.CAP_PROP_POS_FRAMES, count)
             success, image = cap.read()
@@ -174,33 +198,33 @@ def mp_detect_hands(video_path, save_path, start_index = 0, end_index = 900, sho
             # pass by reference.
             image.flags.writeable = False
             results = hands.process(image)
-
             # Draw the hand annotations on the image.
             image.flags.writeable = True
             image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
             if results.multi_hand_landmarks:
+                xyzpos_frame = []
+                action_id_frame = []
+                landmarks_frame = []
+                
                 for hand_landmarks in results.multi_hand_landmarks:
                     mp_drawing.draw_landmarks(image, hand_landmarks, mp_hands.HAND_CONNECTIONS)
-                    image = simpleGesture(image, hand_landmarks.landmark)
-
-            if(show_output):
-                cv2.imshow('MediaPipe Hands', image)
-                if cv2.waitKey(1) & 0xFF == 27:
-                    break
+                    action_id = simpleGesture(hand_landmarks.landmark)
+                    if save_video:
+                        add_text_to_image(image, action_id)
+                    xyzpos = np.array([[lm.x, lm.y, lm.z] for lm in hand_landmarks.landmark])
+                    x, y, z = xyzpos.mean(0)
+                    xyzpos_frame.append([x,y,z])
+                    action_id_frame.append(action_id)
+                    landmark_frame.append(hand_landmarks)
+            else:
+            #cv2.imshow('MediaPipe Hands', cv2.resize(image, None, fx=0.5, fy=0.5))
             count +=1
-            out_video.write(image)
+            if save_video:
+                out_video.write(image)
+            #if cv2.waitKey(1) & 0xFF == 27:
+            #    break
     cap.release()
-    out_video.release()
-    cv2.destroyAllWindows()
-
-if __name__ == "__main__":
-    print("args:", sys.argv)
-    video_path = sys.argv[1]
-    save_path = sys.argv[2]
-    start_index = sys.argv[3]
-    end_index = sys.argv[4]
-    if len(sys.argv)>5:
-        show_output = bool(sys.argv[5])
-    else:
-        show_output = False
-    mp_detect_hands(video_path, save_path, start_index, end_index, show_output)
+    if save_video:
+        out_video.release()
+    #cv2.destroyAllWindows()
+    return result_list
