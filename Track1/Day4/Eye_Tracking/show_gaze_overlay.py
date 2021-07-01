@@ -1,7 +1,7 @@
 """
 Created on Tue Jun 16 10:22:18 2020
 
-Usage: python show_gaze_overlay.py [data_path] [start_time] [end_time]
+Usage: python show_gaze_overlay.py [data_path] [start_time] [end_time] [show_output]
 
         Parameters
         ----------
@@ -13,6 +13,9 @@ Usage: python show_gaze_overlay.py [data_path] [start_time] [end_time]
 
         data_path: str
             path to the data folder
+
+        show_output: bool
+            show the output during runtime
 
 @author: KamranBinaee
 
@@ -29,26 +32,6 @@ import os
 import pandas as pd
 import mediapipe as mp
 import math
-
-def read_input_arguments(args):
-
-    # World video is recorded at 30 fps
-    fps = 30
-    # read the input arguments and store them to start and end time
-    start_time = tuple(args.start_time)
-    end_time = tuple(args.end_time)
-    print('Start Time:', start_time)
-    print('End Time:', end_time)
-
-    start_index = (start_time[0] * 60 + start_time[1]) * fps
-    end_index = (end_time[0] * 60 + end_time[1]) * fps
-    print('Start Frame idx = %d' % start_index)
-    print('End Frame idx= %d' % end_index)
-
-    data_path = args.data_path[0]
-    print('reading video: ', data_path + '/eye0.mp4')
-
-    return start_index, end_index, data_path
 
 
 def add_text_to_image(image, text):
@@ -83,7 +66,7 @@ def detect_draw_checkerboard(gray, img):
 
 
 
-def show_gaze_overlay(data_path, start_index, end_index):
+def show_gaze_overlay(data_path, start_index, end_index, show_output=False):
     horizontal_pixels = 1280
     vertical_pixels = 1024
 
@@ -187,24 +170,26 @@ def show_gaze_overlay(data_path, start_index, end_index):
         # print(frame_no_gaze.shape, fovea.shape)
         #print(range_x.shape, range_y.shape)
         #print(range_x.min(), range_x.max(), range_y.min(), range_y.max())
-        cv2.imshow('img', img)
         out.write(img)
-        # cv2.imshow('fovea', fovea)
-        # out_fovea.write(fovea)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+        if(show_output):
+            cv2.imshow('img', img)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
 
     print('\nDone!')
 
     cv2.destroyAllWindows()
     # Release the video writer handler so that the output video is saved to disk
     out.release()
-    # out_fovea.release()
 
 
 if __name__ == "__main__":
+    print("args:", sys.argv)
     data_path = sys.argv[1]
     start_index = int(sys.argv[2])
     end_index = int(sys.argv[3])
-    print("args:", sys.argv)
-    show_gaze_overlay(data_path, start_index, end_index)
+    if len(sys.argv)>4:
+        show_output = bool(sys.argv[4])
+    else:
+        show_output = False
+    show_gaze_overlay(data_path, start_index, end_index, show_output)
