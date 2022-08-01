@@ -61,7 +61,7 @@ This page contains a bunch of bash commands that we will use during our introduc
 
 * remove the directory, since it is useless after all:
 `rm empty_files/`
-    * this will fail! 
+    * this will fail! You need to find an option in rm that will remove not only a directory but also (recursively) the files and folders inside it. 
 
 
 ## More copying on the same computer
