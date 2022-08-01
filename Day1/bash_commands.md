@@ -27,11 +27,50 @@ This page contains a bunch of bash commands that we will use during our introduc
 * disconnect from any node with <ctrl>-d (hold "control" button and press "d")
 
 # Afternoon
-## `cp` command - copying files on a single computer
-(Done from your personal VM)
+## File manipulation : viewing files (`cat`, `head`, `tail`, `less`, `man`)
+(Done from your personal VM or laptop; you should have the example shell data in the home directory)
+* Show the full contents of a file: 
+`cat ~/shell-lesson-data/exercise-data/animal-counts/animals.csv`
+
+* Show the first (n) lines of a file:
+`head ~/shell-lesson-data/exercise-data/creatures/basilisk.dat`
+
+* Show the last (n) lines of a file: 
+`tail ~/shell-lesson-data/exercise-data/creatures/basilisk.dat`
+
+* Show a scrollable version of a (long) text file:
+`less ~/shell-lesson-data/exercise-data/writing/LittleWomen.txt` (see below for help with `less` command!)
+
+## File maniupation: creating, copying, moving, deleting files and directories (`touch`, `cp`, `mv`, `rm`, `mkdir`, `rmdir`)
+(Done from your personal VM or laptop; you should have the example shell data in the home directory. Start in the home directory: `cd ~/`)
+
+* Create a new empty file: 
+`touch hello.txt` then `ls` to see new file, then `cat hello.txt` to see that it is empty (nothing is displayed with this call to `cat`)
+
+* copy that file to a new name: 
+`cp hello.txt backatyou.txt` then `ls` to see that it exists
+
+* remove the newly copied file: 
+`rm backatyou.txt` then `ls` to see that it is gone
+
+* make a directory to put the empty file, called "empty_files":
+`mkdir empty_files` then `ls` to see that it is there
+
+* move the empty file into the directory:
+`mv hello.txt empty_files/`
+
+* remove the directory, since it is useless after all:
+`rm empty_files/`
+    * this will fail! 
+
+
+## More copying on the same computer
 * Copy a file from the example data to your home directory: `cp ~/shell-lesson-data/exercise-data/animal-counts/animals.csv ~/`
 
 * Copy a file from the example data to your home directory and rename it as you copy it: `cp ~/shell-lesson-data/exercise-data/animal-counts/animals.csv ~/love_these_animals.csv`
+
+* Copy a whole directory of files (this won't work without a bit of modification!)
+`cp ~/shell-lesson-data/ ~/shell-lesson-data-bkup/`
 
 ## `scp` and `rsync` commands - copying files between computers
 * Copy a file from your computer to the ~/uploads/ directory on bdss_node_party (communal) VM: 
